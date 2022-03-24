@@ -1,13 +1,8 @@
 from cgitb import reset
-from dataclasses import dataclass, field
 import logging
 from functools import wraps
-from multiprocessing.sharedctypes import Value
-from sre_constants import MAX_REPEAT
-from threading import TIMEOUT_MAX
 import time
 from datetime import datetime, date
-from tracemalloc import start
 
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
