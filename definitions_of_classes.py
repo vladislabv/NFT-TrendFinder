@@ -5,27 +5,28 @@ import time
 
 from retry import retry
 import pandas as pd
-#import numpy as np
+# import numpy as np
 import requests
 from pymongo import MongoClient
 
 from custom_exceptions import ItemIndexError, RequestFailedException
+
 
 @dataclass
 class MongoDB:
     CONNECTION_STRING: str
 
     def get_database():
-
         # Provide the mongodb atlas url to connect python to mongodb using pymongo
         CONNECTION_STRING = "mongodb+srv://<username>:<password>@<cluster-name>.mongodb.net/myFirstDatabase"
 
         # Create a connection using MongoClient. You can import MongoClient or use pymongo.MongoClient
-        
+
         client = MongoClient(CONNECTION_STRING)
 
         # Create the database for our example (we will use the same database throughout the tutorial
         return client['user_shopping_list']
+
 
 class PreparedItem:
     """Class for extracting items from MongoDB and prepare them for further analysis"""
@@ -50,28 +51,28 @@ class PreparedItem:
 
     def form_content(self) -> None:
         content_df = pd.DataFrame.from_dict(self.content_info)
-        
+
         self.content_info = content_df.head(1)[['url']]
-    
+
     def form_last_sale(self) -> None:
         self.last_sale['currency'] = self.last_sale.pop('currency').get('@type')
         sale_df = pd.DataFrame(self.last_sale, index=[0])
 
         sale_df.drop(columns=['value'], inplace=True)
-        sale_df.rename(columns={'date':'sold_date', 'seller':'seller_id', 'buyer':'buyer_id'}, inplace=True)
+        sale_df.rename(columns={'date': 'sold_date', 'seller': 'seller_id', 'buyer': 'buyer_id'}, inplace=True)
 
         add_sell_cols = ['seller_id', 'buyer_id']
         for col in add_sell_cols:
             if col not in sale_df.columns:
                 sale_df[col] = None
-        
+
         self.last_sale = sale_df
 
     def form_item(self) -> None:
         keys = ['id', 'creators', 'mintedAt']
         self.item = {k: v for k, v in self.item.items() if k in keys}
         self.item['creator_id'] = self.item.pop('creators')[0]['account']
-        
+
         self.item = pd.DataFrame(self.item, index=[0])
 
     def form_output(self) -> None:
@@ -84,7 +85,7 @@ class PreparedItem:
         base_info = pd.concat(
             [self.item, self.content_info, self.last_sale],
             axis=1
-            )
+        )
 
         output = base_info.merge(self.attributes, on='id', how='inner')
 
@@ -98,7 +99,7 @@ class OutputAPI:
     """
     duration: int = 1
     to_date: datetime = field(default_factory=datetime.now)
-    BLOCKCHAIN_REQUEST = 'ETHEREUM' 
+    BLOCKCHAIN_REQUEST = 'ETHEREUM'
     SIZE_RESPONSE = 100
     OUTPUT_LIMIT = 10_000
     REQUEST_TIMEOUT = 10
@@ -108,10 +109,10 @@ class OutputAPI:
         from_date = self.to_date - timedelta(days=self.duration)
         date_unix = time.mktime(from_date.timetuple())
         return {
-            "size": self.SIZE_RESPONSE, 
-            "blockchains": self.BLOCKCHAIN_REQUEST, 
+            "size": self.SIZE_RESPONSE,
+            "blockchains": self.BLOCKCHAIN_REQUEST,
             "lastUpdatedFrom": int(date_unix)
-            }
+        }
 
     @retry(RequestFailedException, tries=3, delay=2)
     def get_raw_items(self) -> list[dict]:
@@ -150,7 +151,7 @@ class OutputAPI:
                 filter_valid_sold_items, raw_items
             )
         )
-    
+
     def fetch_items_from_API(self) -> pd.DataFrame:
         cycles = int(self.OUTPUT_LIMIT / self.SIZE_RESPONSE)
         result_table = pd.DataFrame()
@@ -161,6 +162,6 @@ class OutputAPI:
             result_table = pd.concat(
                 [result_table, PreparedItem.OUTPUT_TABLE],
                 axis=0
-                )
+            )
             PreparedItem.OUTPUT_TABLE = pd.DataFrame()
         return result_table
