@@ -3,12 +3,11 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 import time
 
+import pymongo
 from retry import retry
 import pandas as pd
 # import numpy as np
 import requests
-from pymongo import MongoClient
-
 from custom_exceptions import ItemIndexError, RequestFailedException
 
 
@@ -17,15 +16,11 @@ class MongoDB:
     CONNECTION_STRING: str
 
     def get_database():
-        # Provide the mongodb atlas url to connect python to mongodb using pymongo
-        CONNECTION_STRING = "mongodb+srv://<username>:<password>@<cluster-name>.mongodb.net/myFirstDatabase"
-
-        # Create a connection using MongoClient. You can import MongoClient or use pymongo.MongoClient
-
-        client = MongoClient(CONNECTION_STRING)
-
-        # Create the database for our example (we will use the same database throughout the tutorial
-        return client['user_shopping_list']
+        client = pymongo.MongoClient(
+            "mongodb+srv://admin:admin@cluster0.rb36j.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+        )
+        db = client.test
+        print(db)
 
 
 class PreparedItem:

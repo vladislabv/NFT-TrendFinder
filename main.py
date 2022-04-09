@@ -1,6 +1,7 @@
 """The file fetches data from Rarible API and saves it to the local MongoDB Database"""
 
 from definitions_of_classes import OutputAPI
+from definitions_of_classes import MongoDB
 
 
 def main():
@@ -12,7 +13,8 @@ def main():
     except Exception as e:
         print(e)
         result_status = 1
-
+    db = MongoDB.get_database()
+    print(db)
     return result_status
 
 
