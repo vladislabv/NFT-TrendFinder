@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block header %}Configuration Page{% endblock %}
+{% block content %}
+    <form method="POST" action="." accept-charset="UTF-8" role="form" class="cfg_input_u">
+      <div class="input-boxes">
+
+        <div class="group">      
+          <input type="text" required>
+          <span class="highlight"></span>
+          <span class="bar"></span>
+          <label>Enter days back to start</label>
+        </div>
+          
+        <div class="group">      
+          <input type="text" required>
+          <span class="highlight"></span>
+          <span class="bar"></span>
+          <label>Enter your driver path</label>
+        </div>
+
+      </div>
+    </form>
+    <form method="POST" action="." accept-charset="UTF-8" role="form" class="cfg_input_b">
+        <div class="checkboxes">
+          <label class="toggle">
+            <input class="toggle-checkbox" type="checkbox" checked>
+            <div class="toggle-switch"></div>
+            <span class="toggle-label">Begin item extraction</span>
+          </label> 
+
+          <label class="toggle">
+            <input class="toggle-checkbox" type="checkbox">
+            <div class="toggle-switch"></div>
+            <span class="toggle-label">Begin user extraction</span>
+          </label>
+
+        </div>      
+    </form>
+    <input type="submit" value="Submit" class = "cfg_input_btn">
+
+    {% if progress_run %}
+
+      <label for="db_import">Downloading progress:</label>
+      <progress id="db_import" value="{{ current }}" max="{{ total }}"> {{ str(round(current/total, 0))+'%' }} </progress>
+
+    {% endif %}
+{% endblock %}
