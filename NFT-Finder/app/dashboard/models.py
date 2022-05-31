@@ -1,9 +1,10 @@
 #from mongoengine import Document, CASCADE, ValidationError
+from fileinput import filename
 import mongoengine as me
 from flask_mongoengine import BaseQuerySet
 #from .selenium_class import get, get_picture
 #from app import db as me
-from .add_extensions import get_picture
+from PIL import UnidentifiedImageError
 
 BASE_USER_URL = 'https://rarible.com/user/'
 
@@ -88,7 +89,11 @@ class NftItem(me.Document):
     token_id = me.IntField()
     # time_minted = minted_at - datetime.now
     url = me.URLField()
-    picture = me.ImageField(size=(1920, 1080, True))
+    name = me.StringField()
+    description = me.StringField()
+    # picture = me.ImageField(size=(1920, 1080, True))
+    filename = me.StringField()
+    attr_string = me.StringField()
     # references to participated users
     creators = me.ListField(me.ReferenceField(RaribleUser, reverse_delete_rule=me.CASCADE))
     seller_id = me.ReferenceField(RaribleUser, reverse_delete_rule=me.CASCADE)
@@ -115,7 +120,27 @@ class NftItem(me.Document):
             id_db = None
 
         if id_db:
-            raise me.ValidationError('Violated unique constrain, the id does already exist in the database.')
+            raise me.ValidationError(f'Violated unique constrain, the id {self._id} does already exist in the database.')
+        else:
+            if self.url:
+                try:
+                   avatar_img = 1
+                except UnidentifiedImageError as err:
+                    print(err)
+                    avatar_img = None
+                if avatar_img:
+                    self.filename = avatar_img
+                    filename_txt = avatar_img[: 12] + '.txt'
+                    with open(filename_txt, 'w') as f:
+                        try:
+                            f.write(self.attr_string)
+                        except UnicodeEncodeError as err:
+                            print(err)
+                            f.write("Default string")
+                    #with open(avatar_img, 'rb') as img:
+                    #    self.picture.put(img)
+                else:
+                    raise me.ValidationError(f'Picture for the item {self._id} could not be loaded.')
         
             #raise me.ValidationError('All submitted nft attributes should be key-value structured.')
         

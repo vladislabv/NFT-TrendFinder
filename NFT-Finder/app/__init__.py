@@ -1,19 +1,47 @@
 # Import flask and template operators
 import os
-
-from flask import Flask, render_template, request, redirect, url_for
-from dotenv import load_dotenv
+import sys
+import logging
 from celery import Celery
+from flask_caching import Cache
+from flask import Flask
+from dotenv import load_dotenv
+from config import MONGODB_DB, MONGODB_CONNECTION_STRING
+BASE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, BASE)
 
-# Import MongoAlchemy
-from flask_mongoengine import MongoEngine
+# all variables from .env will be loaded into environment
+load_dotenv(
+    os.path.join(
+        os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__)
+        )), # get path of the current file
+        "env\.env" # file name
+        )
+    )
+
+logging.basicConfig(
+    level=logging.INFO, 
+    filename='myapp.txt', 
+    format='%(asctime)s %(levelname)s:%(message)s'
+    )
+
+logger = logging.getLogger(__name__)
+
+"""
+By design, asyncio does not allow its event loop to be nested and patches asyncio to allow nested use of 
+asyncio.run and loop.run_until_complete.
+"""
 
 def make_celery(app):
     celery = Celery(
         app.import_name,
-        backend=app.config['CELERY_RESULT_BACKEND'],
-        broker=app.config['CELERY_BROKER_URL']
+        backend=app.config['CELERY_BACKEND_URL'],
+        broker=app.config['CELERY_BROKER_URL'],
+        include=[f"app.tasks"]
     )
+    celery.conf.update(app.config)
+    celery.autodiscover_tasks(force=True)
 
     class ContextTask(celery.Task):
         def __call__(self, *args, **kwargs):
@@ -27,64 +55,14 @@ def make_celery(app):
 app = Flask(__name__)
 # Configurations
 app.config.from_object('config')
+app.config.update(
+    CELERY_BROKER_URL=os.environ.get("CELERY_BROKER_URL"),
+    CELERY_BACKEND_URL=os.environ.get("CELERY_BACKEND_URL"),
+)
 celery = make_celery(app)
+cache = Cache(app)
 
-# all variables from .env will be loaded into environment
-load_dotenv(
-    os.path.join(
-        os.path.dirname(
-            os.path.dirname(os.path.abspath(__file__)
-        )), # get path of the current file
-        "env\.env" # file name
-        )
-    )
+import routes
 
-# Define the database object which is imported
-# by modules and controllers
-db = MongoEngine(app)
-#from .dashboard.models import User, me
-#try:
-#    User(name="Vlad", password="123", email="vv@gmail.com").save()
-#except me.ValidationError as err:
-#    print('The username or email already exist in the system, please try another combination.')
-
-#db.init_app(app)
-
-# Sample HTTP error handling
-@app.errorhandler(404)
-def not_found(error):
-    return render_template('404.html'), 404
-
-@app.route('/home')
-def home():
-    if request.method == 'GET':
-        redirect(url_for('home'))
-    return render_template('home.html')
-
-@app.route('/login')
-def login():
-    if request.method == 'GET':
-        redirect(url_for('login'))
-    return render_template('login.html')
-
-@app.route('/logout')
-def logout():
-    if request.method == 'GET':
-        redirect(url_for('logout'))
-    return render_template('logout.html')
-
-# Import a module / component using its blueprint handler variable (mod_auth)
 from app.dashboard import dashboard_bp as dashboard_module
 app.register_blueprint(dashboard_module)
-
-# Register blueprint(s)
-#app.register_blueprint(auth_module)
-# app.register_blueprint(xyz_module)
-# ..
-
-@celery.task()
-def add_together(a, b):
-    return a + b
-
-result = add_together.delay(2, 2)
-#result.wait()  # 65
