@@ -13,7 +13,6 @@
 	 width: 100vw;
 	 height: 100vh;
 	 min-height: 700px;
-	 overflow: hidden;
 }
  .tabs-controls {
 	 position: relative;
@@ -65,13 +64,20 @@
  .card {
 	 position: absolute;
 	 width: 500px;
-	 height: 300px;
+	 height: 600px;
 	 background-color: #edebd7;
 	 border: 1px solid #423e37;
 	 box-shadow: 9px 11px 3px 0px rgba(0, 0, 0, 0.2);
 	 box-sizing: border-box;
 	 padding: 40px;
 	 transition: transform 0.3s, opacity 0.2s;
+	 flex-basis: 500px;
+	 flex-grow: 0;
+ 	 flex-shrink: 0;
+	 overflow-y: scroll;
+}
+ .card img {
+	 width: 100%;
 }
  .card.hidden {
 	 z-index: 100;
@@ -83,6 +89,10 @@
  .card.hidden h1 {
 	 color: #fff;
 	 transition: color 0.5s;
+}
+.card.hidden p {
+	color: #fff;
+	transition: color 0.5s;
 }
  .card.hidden:nth-of-type(1) {
 	 transform: rotate(-30deg) translateX(101%) translateY(-30%) scale(0.4) skewX(11deg) skewY(10deg);
