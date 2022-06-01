@@ -1,10 +1,12 @@
   .topnav {
+    position: relative;
+    width: 100%;
     text-align: left;
     font-size: 18;
-    padding-left: 10px;
-    padding-top: 15px;
     background: #282d32;
     height: 50px;
+    margin: 0;
+    padding: 15px 0 0 10px;
   }
 
   .topnav a {
