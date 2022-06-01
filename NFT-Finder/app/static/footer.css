@@ -1,8 +1,9 @@
 .footer-dark {
-    position: fixed;
+    position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
+    height: 150px;
     padding: 25px 0;
     color:#f0f9ff;
     background-color:#282d32;
@@ -41,7 +42,7 @@
   }
   
   .footer-dark .item.text {
-    margin-bottom:36px;
+    margin-bottom:10px;
   }
   
   @media (max-width:767px) {
@@ -86,7 +87,6 @@
   
   .footer-dark .copyright {
     text-align:center;
-    padding-top:24px;
     opacity:0.3;
     font-size:13px;
     margin-bottom:0;
