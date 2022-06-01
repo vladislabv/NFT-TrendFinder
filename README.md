@@ -15,10 +15,5 @@ What the project does?
 Why the project is useful?
 The crypto-art industry is growing exponentially. This is facilitated by the strengthening of the organic union between human and machine, which involves the development of gamification and decoration of the virtual space as a whole. The fact that we are entering a new rapidly developing era does not mean at all that people are adjusting to its requirements just as quickly. So if a company or an individual user wants to keep up with the times - by that we mean quick earnings from trading on NFT marketplaces OR search for contemporary high-level artists and styles - but do not have an artistic background --- our NFT_TrendFinder will be able to lend them a helping hand by giving them a finished NFT and actual information about the market. Which will help them not to waste time on drawing and designing pictures and researching the marketplace.
 
-How users can get started with the project? - ?? 
-
-
-Where users can get help with your project? - ?? 
-
 Who maintains and contributes to the project?
-Alla Borodina & Vladislav Stasenko - should i write any adress??
+Alla Borodina & Vladislav Stasenko
