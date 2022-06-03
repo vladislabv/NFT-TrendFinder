@@ -1,10 +1,9 @@
 import random
-from helpers.add_extensions import find_nth
+from nft_finder.helpers.add_extensions import find_nth
 
 def prepare_data(dashboard_data):
-
     for i in dashboard_data:
-        if i[1] == 'rich_pairs':
+        if i[1] == 'rich_items':
             rich_items_data = i[0]
         elif i[1] == 'value_aggregation':
             top_values = i[0]
@@ -13,8 +12,8 @@ def prepare_data(dashboard_data):
         elif i[1] == 'pair_aggregation':
             top_pairs_data = i[0]
         else:
-            raise Exception("The route handler has got a unknown agggregation_pipeline")
-
+            raise Exception("The route handler has got a unknown aggregation_pipeline")
+            
     rich_pairs = list(
         map(
             lambda x: str(x['_id']['price']) + ' ' + 'ETH: ' + ', '.join(x['pairs'])[:find_nth(', '.join(x['pairs']), ',', 10)], rich_items_data
@@ -22,7 +21,7 @@ def prepare_data(dashboard_data):
     )
     rich_images = list(
         map(
-            lambda x: x['_id']['filename'].split('/')[-1], rich_items_data
+            lambda x: x['_id'].get('filename').split('/')[-1], rich_items_data
         )
     )
     rich_info = list(

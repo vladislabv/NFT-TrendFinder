@@ -1,9 +1,7 @@
 import os
 import sys
 import logging
-BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, BASE)
-from helpers.add_extensions import duration
+from nft_finder.helpers.add_extensions import duration
 # set logger
 logger = logging.getLogger(__name__)
 
@@ -37,6 +35,9 @@ value_aggregation = [
 ]
 
 rich_items = [
+    {
+        '$match': { 'filename': { '$exists': True } }
+    },
     {
         '$sort': {
             'price': -1

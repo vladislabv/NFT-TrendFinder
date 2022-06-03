@@ -17,7 +17,7 @@
 {% block custom_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='showpage.css') }}">
 {% endblock %}
-
+{% if ready %}
 {% block content %}
     <section class="page">
         <section>
@@ -83,5 +83,9 @@
     </section>
 
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='flycards.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/flycards.js') }}"></script>
 {% endblock %}
+{% else %}
+    <h1 style="text-align: center;">Your data is being fetched...</h1>
+    <h2 style="text-align: center;">Please wait</h2>
+{% endif %}

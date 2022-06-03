@@ -1,5 +1,5 @@
 from flask import render_template, url_for, redirect, request
-from app import app
+from nft_finder import app
 
 @app.errorhandler(404)
 def not_found(error):
