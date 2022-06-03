@@ -9,6 +9,10 @@
 	 line-height: 1;
 	 color: #423e37;
 }
+ img {
+	width: 400px;
+	height: auto;
+ }
  .page {
 	 width: 100vw;
 	 height: 100vh;
@@ -136,4 +140,7 @@
  .card:nth-of-type(6) {
 	 z-index: 0;
 	 transform: translateX(50px) translateY(50px);
+}
+ li:not(:last-child) {
+    margin-bottom: 20px;
 }

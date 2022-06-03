@@ -2,21 +2,20 @@
 import os
 import sys
 import logging
+from pymongo import MongoClient
 from celery import Celery
 from flask_caching import Cache
 from flask import Flask
 from dotenv import load_dotenv
-from config import MONGODB_DB, MONGODB_CONNECTION_STRING
-BASE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, BASE)
+from config import MONGODB_CONNECTION_STRING
 
 # all variables from .env will be loaded into environment
 load_dotenv(
     os.path.join(
         os.path.dirname(
             os.path.dirname(os.path.abspath(__file__)
-        )), # get path of the current file
-        "env\.env" # file name
+        )),
+        "env\.env"
         )
     )
 
@@ -28,17 +27,12 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-"""
-By design, asyncio does not allow its event loop to be nested and patches asyncio to allow nested use of 
-asyncio.run and loop.run_until_complete.
-"""
-
 def make_celery(app):
     celery = Celery(
         app.import_name,
         backend=app.config['CELERY_BACKEND_URL'],
         broker=app.config['CELERY_BROKER_URL'],
-        include=[f"app.tasks"]
+        include=[f"{app.import_name}.tasks"]
     )
     celery.conf.update(app.config)
     celery.autodiscover_tasks(force=True)
@@ -60,9 +54,10 @@ app.config.update(
     CELERY_BACKEND_URL=os.environ.get("CELERY_BACKEND_URL"),
 )
 celery = make_celery(app)
+db_client = MongoClient(MONGODB_CONNECTION_STRING)
 cache = Cache(app)
 
-import routes
+import nft_finder.routes
 
-from app.dashboard import dashboard_bp as dashboard_module
+from nft_finder.dashboard import dashboard_bp as dashboard_module
 app.register_blueprint(dashboard_module)

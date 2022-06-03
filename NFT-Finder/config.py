@@ -3,7 +3,7 @@ import os
 DEBUG = True
 # Define the application directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))  
-MEDIA_FOLDER = os.path.join("A:/", "nft_finder_temp_images")
+MEDIA_FOLDER = os.path.join("A:/", "nft_finder_temp_images", "images")
 # CELERY MONGO SETTINGS
 MONGODB_DB = 'nft-finder'
 MONGODB_CONNECTION_STRING = 'mongodb://localhost:27017'
@@ -20,9 +20,9 @@ THREADS_PER_PAGE = 2
 #CSRF_ENABLED = True
 
 # setting celery tasks
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
+ACCEPT_CONTENT = ['json']
+TASK_SERIALIZER = 'json'
+RESULT_SERIALIZER = 'json'
 # Use a secure, unique and absolutely secret key for
 # signing the data. 
 #CSRF_SESSION_KEY = 'e16d77a31be1a1937524214f74f20a5b'

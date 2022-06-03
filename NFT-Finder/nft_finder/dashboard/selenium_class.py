@@ -14,7 +14,7 @@ import mongoengine as me
 
 
 from .models import RaribleUser
-from .add_extensions import SafeDict, SafeList, timing, get_picture, convert_to_int
+from helpers.add_extensions import SafeList, timing, get_picture, convert_to_int
 
 # set logger
 
