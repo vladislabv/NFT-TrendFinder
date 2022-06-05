@@ -1,5 +1,4 @@
 $(document).ready(function() {
-	console.log('Готов!');
 	var oldId = null;
 
 	$('.tabs-controls__link').click(function(e) {

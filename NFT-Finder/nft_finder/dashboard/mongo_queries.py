@@ -1,6 +1,5 @@
-import os
-import sys
 import logging
+import datetime
 from nft_finder.helpers.add_extensions import duration
 # set logger
 logger = logging.getLogger(__name__)
@@ -13,30 +12,75 @@ async def execute_agg_pipeline(db, collection, agg_pipeline, pipeline_name):
 
 # ---*--- Aggregation Pipelines ---*---
 pair_aggregation = [
+  { "$match": { 
+    "value":{ "$nin": [ "None", "none", "???" ] }
+    }
+  },
   { "$addFields": { "pair": { "$concat": [ "$value", " ", "$key" ] } } },
-  { "$match": { "value":{ "$nin": [ "None", "???" ] } } },
-  { "$group": { "_id": "$pair", "totalAmount": {"$sum": 1} } },
+  { "$group": { "_id": "$pair", "totalAmount": {"$sum": 1}, "identificator": {"$first": "$item_id"} } },
   { "$sort": { "totalAmount": -1 } },
+  {
+    '$lookup': {
+        'from': 'nft_item', 
+        'localField': 'identificator', 
+        'foreignField': '_id', 
+        'as': 'related_item'
+    }
+  },
+  { "$match": { 
+      'related_item.sold_date': { '$gte': datetime.date(2022, 4, 1), '$lt': datetime.date.today() } 
+      } 
+  },
+  {'$unset': 'related_item'},
   { "$limit": 15 }
 ]
 
 key_aggregation = [
-  { "$match": { "value":{ "$nin": [ "None", "???" ] } } },
-  { "$group": { "_id": "$key", "totalAmount": {"$sum": 1} } },
+  { "$group": { "_id": "$key", "totalAmount": {"$sum": 1}, "identificator": {"$first": "$item_id"} } },
   { "$sort": { "totalAmount": -1 } },
+  {
+    '$lookup': {
+        'from': 'nft_item', 
+        'localField': 'identificator', 
+        'foreignField': '_id', 
+        'as': 'related_item'
+    }
+  },
+  { "$match": { 
+      "value":{ "$nin": [ "None", "none", "???" ] },
+      'related_item.sold_date': { '$gte': datetime.date(2022, 4, 1), '$lt': datetime.date.today() } 
+      } 
+  },
+  {'$unset': 'related_item'},
   { "$limit": 15 }
 ]
 
 value_aggregation = [
-  { "$match": { "value":{ "$nin": [ "None", "???" ] } } },
-  { "$group": { "_id": "$value", "totalAmount": {"$sum": 1} } },
+  { "$group": { "_id": "$value", "totalAmount": {"$sum": 1}, "identificator": {"$first": "$item_id"} } },
   { "$sort": { "totalAmount": -1 } },
+  {
+    '$lookup': {
+        'from': 'nft_item', 
+        'localField': 'identificator', 
+        'foreignField': '_id', 
+        'as': 'related_item'
+    }
+  },
+  { "$match": { 
+      "value":{ "$nin": [ "None", "none", "???" ] },
+      'related_item.sold_date': { '$gte': datetime.date(2022, 4, 1), '$lt': datetime.date.today() } 
+      } 
+  },
+  {'$unset': 'related_item'},
   { "$limit": 15 }
 ]
 
 rich_items = [
     {
-        '$match': { 'filename': { '$exists': True } }
+        '$match': { 
+            'filename': { '$exists': True },
+            'sold_date': { '$gte': datetime.date(2022, 4, 1), '$lt': datetime.date.today() }
+            }
     },
     {
         '$sort': {
@@ -83,6 +127,11 @@ rich_items = [
             'pairs': {
                 '$push': '$pair'
             }
+        }
+    },
+    {
+        '$addFields': {
+            'pairs': { '$setUnion': [ '$pairs', [] ] }
         }
     },
     {
