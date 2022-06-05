@@ -19,10 +19,12 @@ THREADS_PER_PAGE = 2
 # Enable protection agains *Cross-site Request Forgery (CSRF)*
 #CSRF_ENABLED = True
 
-# setting celery tasks
+# Celery settings
 ACCEPT_CONTENT = ['json']
 TASK_SERIALIZER = 'json'
 RESULT_SERIALIZER = 'json'
+#VISIBILITY_TIMEOUT = 12000
+
 # Use a secure, unique and absolutely secret key for
 # signing the data. 
 #CSRF_SESSION_KEY = 'e16d77a31be1a1937524214f74f20a5b'
@@ -31,3 +33,7 @@ RESULT_SERIALIZER = 'json'
 SECRET_KEY = '9febb642f19b6d58f5a92ba405252f65'
 # Cache setting
 CACHE_TYPE = "SimpleCache"
+
+# DALLE paths
+DALLE_FOLDER = os.path.join('A:/', 'dalle', 'DALLE-pytorch')
+DALLE_ENV = os.path.join('A:/', 'dalle', 'venv', 'Scripts', 'activate')

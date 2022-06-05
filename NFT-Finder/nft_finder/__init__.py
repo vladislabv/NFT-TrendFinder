@@ -35,7 +35,8 @@ def make_celery(app):
         include=[f"{app.import_name}.tasks"]
     )
     celery.conf.update(app.config)
-    celery.autodiscover_tasks(force=True)
+    #celery.conf.broker_transport_options = {"visibility_timeout": float("inf")}
+    #celery.autodiscover_tasks(force=True)
 
     class ContextTask(celery.Task):
         def __call__(self, *args, **kwargs):
@@ -54,6 +55,7 @@ app.config.update(
     CELERY_BACKEND_URL=os.environ.get("CELERY_BACKEND_URL"),
 )
 celery = make_celery(app)
+celery.control.purge()
 db_client = MongoClient(MONGODB_CONNECTION_STRING)
 cache = Cache(app)
 

@@ -15,220 +15,56 @@
 {% endblock %}
 
 {% block custom_css %}
-  <style>
-    .progress {
-        width: 100%;
-        height: 40px;
-        text-align: center;
-        margin: auto;
-        color: white;
-        background-color: #15172b;
-        margin-top: 25px;
-        font-size: medium;
-    }
-    #nf_items_field {
-      width: 30%;
-      text-align: center;
-    }
-    #start-bg-job {
-      appearance: none;
-      background-color: #06b;
-      border: 2px solid #1A1A1A;
-      border-radius: 15px;
-      box-sizing: border-box;
-      color: #FFFFFF;
-      cursor: pointer;
-      display: inline-block;
-      font-family: Roobert,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
-      font-size: 16px;
-      font-weight: 600;
-      line-height: normal;
-      margin-top: 30px;
-      margin-left: 100px;
-      min-height: 60px;
-      min-width: 0;
-      outline: none;
-      padding: 16px 24px;
-      text-align: center;
-      text-decoration: none;
-      transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
-      user-select: none;
-      -webkit-user-select: none;
-      touch-action: manipulation;
-      width: 25%;
-      will-change: transform;
-  }
-
-  #start-bg-job:disabled {
-    pointer-events: none;
-  }
-
-  #start-bg-job:hover {
-    box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
-    transform: translateY(-2px);
-  }
-
-  #start-bg-job:active {
-    box-shadow: none;
-    transform: translateY(0);
-  }
-   a.redirectButton {
-    -webkit-appearance: button;
-    -moz-appearance: button;
-    appearance: button;
-    display: none;
-    text-decoration: none;
-    background-color: #06b;
-    color: white;
-    margin-left: 50px;
-    appearance: none;
-    border: 2px solid #1A1A1A;
-    border-radius: 15px;
-    box-sizing: border-box;
-    cursor: pointer;
-    font-family: Roobert,-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
-    font-size: 16px;
-    font-weight: 600;
-    margin-left: 80px;
-    line-height: normal;
-    min-height: 40px;
-    min-width: 0;
-    outline: none;
-    text-align: center;
-    transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
-    user-select: none;
-    -webkit-user-select: none;
-    touch-action: manipulation;
-    width: 40%;
-    will-change: transform;
-  }
-  .form {
-    margin-left: 40%;
-    margin-top: 5%;
-    background-color: #15172b;
-    border-radius: 20px;
-    box-sizing: border-box;
-    height: 500px;
-    padding: 20px;
-    width: 320px;
-  }
-
-  .title {
-    color: #eee;
-    font-family: sans-serif;
-    font-size: 36px;
-    font-weight: 600;
-    margin-top: 30px;
-  }
-
-  .subtitle {
-    color: #eee;
-    font-family: sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    margin-top: 10px;
-  }
-
-  .input-container {
-    height: 50px;
-    position: relative;
-    width: 100%;
-  }
-
-  .ic1 {
-    margin-top: 60px;
-  }
-
-  .ic2 {
-    margin-top: 50px;
-  }
-
-  .input {
-    background-color: #303245;
-    border-radius: 12px;
-    border: 0;
-    box-sizing: border-box;
-    color: #eee;
-    font-size: 18px;
-    height: 100%;
-    outline: 0;
-    padding: 4px 20px 0;
-    width: 100%;
-  }
-
-  .cut {
-    background-color: #15172b;
-    border-radius: 10px;
-    height: 20px;
-    left: 20px;
-    position: absolute;
-    top: -20px;
-    transform: translateY(0);
-    transition: transform 200ms;
-    width: 76px;
-  }
-
-  .cut-short {
-    width: 50px;
-  }
-
-  .input:focus ~ .cut,
-  .input:not(:placeholder-shown) ~ .cut {
-    transform: translateY(8px);
-  }
-
-  .placeholder {
-    color: #65657b;
-    font-family: sans-serif;
-    left: 20px;
-    line-height: 14px;
-    pointer-events: none;
-    position: absolute;
-    transform-origin: 0 50%;
-    transition: transform 200ms, color 200ms;
-    top: 20px;
-  }
-
-  .input:focus ~ .placeholder,
-  .input:not(:placeholder-shown) ~ .placeholder {
-    transform: translateY(-30px) translateX(10px) scale(0.75);
-  }
-
-  .input:not(:placeholder-shown) ~ .placeholder {
-    color: #808097;
-  }
-
-  .input:focus ~ .placeholder {
-    color: #dc2f55;
-  }
-
-  </style>
+  <link rel="stylesheet" href="/static/start_showpage.css">
 {% endblock %}
+
 {% block content %}
     <!--<button onclick="start_long_task();">Start Long Calculation</button><br><br>-->
-    
   <section class="dshb_user_input">
     <div class="dshb_user_headings">
-        {% for message in get_flashed_messages() %}
-        <p style="color: red;">{{ message }}</p>
-        {% endfor %}
+      {% with messages = get_flashed_messages() %}  
+          {% if messages %}  
+              {% for message in messages %} 
+              <div class="alert-message">
+                  <p>{{ message }}</p> 
+              </div> 
+              {% endfor %}  
+          {% endif %}  
+      {% endwith %}  
     </div>
-    <div class="form">
+    <form id="configForm" class="form">
       <div class="title">Welcome</div>
       <div class="subtitle">Please insert number of items:</div>
       <div class="input-container ic1">
-        <input id="nb_items" class="input" type="text" placeholder=" " />
-        <div class="cut"></div>
-        <label for="nb_items" class="placeholder">Max 50 entities</label>
+        <label for="nb_items">Max 50 entities</label>
+        <input id="nb_items" class="input" type="text">
+      </div><br>
+      <div class="subtitle">Please set date range:</div>
+      <div class="input-container ic2">
+        <label for="start_date">Start Date</label>
+        <input id="start_date" class="input" type="date"><br><br>
+        <label for="end_date">End Date</label>
+        <input id="end_date" class="input" type="date">
       </div>
       <p class="error error--hidden"></p>
-      <button class="start-button" id="start-bg-job">Go!</button>
+      <button type="submit" class="start-button" id="start-bg-job">Go!</button>
       <div id="progress"></div>
       <a href="{{ url_for('dashboard.showpage') }}" id="redirectButton" class="redirectButton">See result</a> 
-    </div>
+    </form>
     
   </section>
   <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
   <script src="http://cdnjs.cloudflare.com/ajax/libs/nanobar/0.2.1/nanobar.min.js"></script>
   <script src="{{ url_for('static', filename='js/process_bg_task.js') }}"></script>
+  <script>
+    $('#configForm').submit(function () {
+        var data = {
+          numberRequested: document.getElementById("nb_items").value,
+          startDate: document.getElementById("start_date").value,
+          endDate: document.getElementById("end_date").value
+        };
+        start_long_task("/dashboard/longtask", data=data);
+        return false;
+    });
+</script>
 {% endblock %}
