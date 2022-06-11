@@ -53,6 +53,7 @@ async def get_server_info() -> None:
     Prints to the logs database information if the connection was successful
     """
     conn_str = os.getenv('MONGODB_CONNECTION_STRING_RW')
+    logger.info(conn_str)
     # set a 5-second connection timeout
     client = motor.motor_tornado.MotorClient(conn_str, serverSelectionTimeoutMS=5000)
         

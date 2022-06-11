@@ -16,7 +16,7 @@ db.createUser(
         pwd   : "Wednesday17",
         roles : [
             {
-                role : "userAdmin",
+                role : "dbAdmin",
                 db   : "nft-finder"
             }
         ]
