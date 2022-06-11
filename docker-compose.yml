@@ -1,0 +1,116 @@
+version: "3"
+
+networks:
+  frontend:
+  backend:
+  mongo_net:
+
+services:
+
+
+  rabbit:
+    image: rabbitmq:3-management
+    hostname: rabbit
+    container_name: rabbit
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: SecretPassword
+      RABBITMQ_DEFAULT_VHOST: 'myvhost'
+    volumes:
+      - ./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+      - ./rabbitmq:/var/lib/rabbitmq
+    ports:
+      - 15672:15672
+      - 5672:5672
+    networks:
+      - backend
+
+
+  mongo:
+    image: mongo:latest
+    hostname: mongo
+    container_name: mongo
+    command: mongod --logpath=/dev/null
+    restart: unless-stopped
+    environment:
+      MONGO_DATA_DIR: /data/db
+      MONGO_LOG_DIR: /dev/null
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: pass
+      MONGO_INITDB_DATABASE: nft-finder
+    volumes:
+      - ./mongodb/data/db:/data/db
+      - ./mongodb/dump:/dump
+      - ./docker-entrypoint-initdb.d/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - ./docker-entrypoint-initdb.d/load_dump.sh:/docker-entrypoint-initdb.d/load_dump.sh
+    ports:
+      - 27017:27017
+    networks:
+      - backend
+      - mongo_net
+
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    restart: unless-stopped
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: pass
+      ME_CONFIG_MONGODB_URL: mongodb://root:pass@mongo:27017/
+    ports:
+      - 8081:8081
+    networks:
+      - mongo_net
+    depends_on:
+      - mongo
+
+
+  # worker:
+  #   build:
+  #     context: .
+  #     dockerfile: worker.Dockerfile
+  #   container_name: worker
+  #   command: celery -A nft_finder.celery worker -l INFO
+  #   restart: unless-stopped
+  #   volumes:
+  #     - .:/var/NFT-TrendFinder
+  #   depends_on:
+  #     - rabbit
+  #     - mongo
+  #   networks:
+  #     - backend
+
+  api_listener:
+    build:
+      context: .
+      dockerfile: listener.Dockerfile
+    container_name: api_listener
+    restart: unless-stopped
+    volumes:
+      - ./logs:/var/NFT-TrendFinder/logs
+    depends_on:
+      - mongo
+    networks:
+      - backend
+
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app
+    restart: unless-stopped
+    volumes:
+      - .:/var/NFT-TrendFinder
+    ports:
+      - 5000:5000
+    depends_on:
+      - mongo
+      - rabbit
+    networks:
+      - backend
+
+  

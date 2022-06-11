@@ -11,6 +11,10 @@ __pycache__/
 .pytest_cache/
 
 # Distribution / packaging
+/celery_results/
+/mongodb/data/
+/rabbitmq/mnesia/
+/rabbitmq/.*cookie
 env/
 bin/
 build/

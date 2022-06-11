@@ -1,0 +1,1 @@
+mongorestore -d nft-finder --uri=mongodb://root:pass@mongo:27017 --authenticationDatabase=admin /dump/nft-finder

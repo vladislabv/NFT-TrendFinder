@@ -1,0 +1,27 @@
+  .topnav {
+    position: relative;
+    width: 100%;
+    text-align: left;
+    font-size: 18;
+    background: #282d32;
+    height: 50px;
+    margin: 0;
+    padding: 15px 0 0 10px;
+  }
+
+  .topnav a {
+    padding: 30px;
+    color: white;
+  }
+
+  /* selected link */
+  .topnav a:active {
+    color: blue;
+}
+  .topna a:focus {
+    color: blue;
+  }
+  .topnav span {
+    padding: 30px;
+    color: red;
+  }
