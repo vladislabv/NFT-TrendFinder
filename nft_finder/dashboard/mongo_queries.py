@@ -1,14 +1,14 @@
 import logging
 import datetime
-from nft_finder.helpers.add_extensions import duration
+#from nft_finder.helpers.add_extensions import duration
 # set logger
 logger = logging.getLogger(__name__)
 
-@duration
-async def execute_agg_pipeline(db, collection, agg_pipeline, pipeline_name):
-    result = await db[collection].aggregate(agg_pipeline).to_list(length = None)
+# @duration
+# async def execute_agg_pipeline(db, collection, agg_pipeline, pipeline_name):
+#     result = await db[collection].aggregate(agg_pipeline).to_list(length = None)
 
-    return result, pipeline_name
+#     return result, pipeline_name
 
 # ---*--- Aggregation Pipelines ---*---
 pair_aggregation = [

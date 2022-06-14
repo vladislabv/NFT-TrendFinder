@@ -3,8 +3,8 @@ import time
 import json
 import glob
 import pickle
-from flask import render_template, send_from_directory, request, url_for, jsonify, redirect, flash, send_file
-from nft_finder import db_client, cache
+from flask import render_template, send_from_directory, request, url_for, jsonify, redirect, send_file
+from nft_finder import cache
 from nft_finder.dashboard import dashboard_bp
 from nft_finder.tasks import get_dashboard_data, generate_picture
 from config import MEDIA_FOLDER, DALLE_FOLDER, WORKDIR
