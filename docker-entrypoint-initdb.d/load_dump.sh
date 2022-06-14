@@ -1,1 +1,4 @@
-mongorestore -d nft-finder --uri=mongodb://root:pass@mongo:27017 --authenticationDatabase=admin /dump/nft-finder
+#!/bin/bash
+# Update system and install packages
+#su root -p pass &&
+mongorestore --authenticationDatabase admin -u root -p pass -d nft-finder /dump/nft-finder

@@ -5,6 +5,7 @@ DEBUG = True
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 WORKDIR = os.path.join(os.path.sep, "var", "NFT-TrendFinder")
 MEDIA_FOLDER = os.path.join(WORKDIR, "image_storage", "images")
+TXT_MEDIA_FOLDER = os.path.join(WORKDIR, "image_storage")
 # DALLE paths
 DALLE_FOLDER = os.path.join(os.path.sep, 'var', 'dalle')
 DALLE_ENV = os.path.join(WORKDIR, 'dalleEnv', 'bin', 'activate')
@@ -25,7 +26,6 @@ THREADS_PER_PAGE = 2
 ACCEPT_CONTENT = ['json']
 TASK_SERIALIZER = 'json'
 RESULT_SERIALIZER = 'json'
-#VISIBILITY_TIMEOUT = 12000
 
 # Use a secure, unique and absolutely secret key for
 # signing the data. 

@@ -27,7 +27,9 @@ services:
 
 
   mongo:
-    image: mongo:latest
+    build:
+      context: .
+      dockerfile: mongo.Dockerfile
     hostname: mongo
     container_name: mongo
     command: mongod --logpath=/dev/null
@@ -40,7 +42,6 @@ services:
       MONGO_INITDB_DATABASE: nft-finder
     volumes:
       - ./mongodb/data/db:/data/db
-      - ./mongodb/dump:/dump
       - ./docker-entrypoint-initdb.d/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
       - ./docker-entrypoint-initdb.d/load_dump.sh:/docker-entrypoint-initdb.d/load_dump.sh
     ports:
@@ -68,21 +69,6 @@ services:
       - mongo
 
 
-  # worker:
-  #   build:
-  #     context: .
-  #     dockerfile: worker.Dockerfile
-  #   container_name: worker
-  #   command: celery -A nft_finder.celery worker -l INFO
-  #   restart: unless-stopped
-  #   volumes:
-  #     - .:/var/NFT-TrendFinder
-  #   depends_on:
-  #     - rabbit
-  #     - mongo
-  #   networks:
-  #     - backend
-
   api_listener:
     build:
       context: .
@@ -91,6 +77,9 @@ services:
     restart: unless-stopped
     volumes:
       - ./logs:/var/NFT-TrendFinder/logs
+      - ./temp_images:/var/NFT-TrendFinder/temp_images
+      - ./api_listener:/NFT-TrendFinder/api_listener
+      - ./config.py:/var/NFT-TrendFinder/config.py
     depends_on:
       - mongo
     networks:

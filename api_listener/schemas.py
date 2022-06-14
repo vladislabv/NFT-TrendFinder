@@ -55,9 +55,6 @@ ntf_item_schema = {
             'buyer_id': {
                 'bsonType': "string",
                 'description': "must be a string, the id relates to the user bought the item"
-            },
-            'attr_string': {
-                'bsonType': "string"
             }
          }
       }

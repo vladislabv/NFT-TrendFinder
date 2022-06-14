@@ -71,7 +71,6 @@ class APICaller:
             params["cursor"] = self.start_with_activity
 
         response = requests.get(self.base_url + '/activities/all', params = params)
-        logger.info(response.status_code)
         if response.status_code == GOOD_STATUS_CODE:
             response_json = response.json()
 

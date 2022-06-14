@@ -1,6 +1,5 @@
 # Import flask and template operators
 import os
-import sys
 import logging
 from pymongo import MongoClient
 from celery import Celery

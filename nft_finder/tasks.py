@@ -8,7 +8,6 @@ from mongoengine import connect
 from dotenv import load_dotenv
 from config import MONGODB_DB, DALLE_ENV, DALLE_FOLDER
 from nft_finder import celery
-#from nft_finder import db_client as client
 from nft_finder.dashboard.prepare_data import prepare_data
 from nft_finder.dashboard.mongo_queries import AGG_PIPELINES_DICT
 from nft_finder.dashboard.models import NftItem, ItemAttribute

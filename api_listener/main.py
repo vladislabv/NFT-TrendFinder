@@ -1,5 +1,6 @@
 """Here are defined all needed functions to start the fetching proccess to the defined database"""
 import os
+import time
 import asyncio
 import nest_asyncio
 import logging
@@ -8,11 +9,12 @@ import motor.motor_tornado
 import tornado.ioloop
 import tornado.web
 from dotenv import load_dotenv
+from pymongo import MongoClient
 from pymongo.errors import BulkWriteError, DuplicateKeyError, WriteError
 from async_api_caller import APICaller
 from data_converter import PreparedItem
 from schemas import schemas
-from helpers.add_extensions import validate_item
+from helpers.add_extensions import validate_item, upload_picture
 
 SECRETS_PATH = os.path.join(
     os.path.dirname(
@@ -47,24 +49,28 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):
         db = self.settings['db']
 
-async def get_server_info() -> None:
+def get_server_info() -> None:
     """Function asserting that the database is right configurated
 
     Prints to the logs database information if the connection was successful
     """
     conn_str = os.getenv('MONGODB_CONNECTION_STRING_RW')
-    logger.info(conn_str)
-    # set a 5-second connection timeout
-    client = motor.motor_tornado.MotorClient(conn_str, serverSelectionTimeoutMS=5000)
-        
-    while True:
+    # define sync client, wait till it is valid, after the async process can start
+    client_sync = MongoClient(conn_str)
+    continue_trying = True
+    while continue_trying:
         try:
-            logger.info(f"Client Server info: {await client.server_info()}")
-            return client
-        except Exception:
-            asyncio.sleep(3)
-            #logger.exception("Unable to connect to the server.")
+            server_info = client_sync.server_info()
+            logger.info(server_info)
+        except Exception as err:
+            logger.warning("Unable connect to the server, trying next in 5 seconds...")
+            time.sleep(5)
             continue
+        continue_trying = False
+    else:
+        # set a 5-second connection timeout
+        client_async = motor.motor_tornado.MotorClient(conn_str, serverSelectionTimeoutMS=5000)
+        return client_async
      
 
 async def create_collections(db: tornado.web.Application, schemas: List[dict]):
@@ -122,7 +128,10 @@ async def do_insert(db: tornado.web.Application, collection: str, *args: List[di
     success = False
     for arg in args:
         try:
-            await db[collection].insert_one(arg)
+            result = await db[collection].insert_one(arg)
+            if collection == "nft_item":
+                filename = await upload_picture(url = arg['url'])
+                await db[collection].update_one({'_id': result.inserted_id}, {'$set': {'filename': filename}})
             count += 1
             success = True
         except (DuplicateKeyError, BulkWriteError, WriteError):
@@ -149,7 +158,7 @@ async def start_fetching(db: tornado.web.Application, fetch_api_data: Callable, 
 
 if __name__ == "__main__":
     app = make_app()
-    client = tornado.ioloop.IOLoop.current().run_sync(get_server_info)
+    client = get_server_info()
     db = client['nft-finder']
     if str(os.getenv('FIRST_SETUP')) == 'TRUE':
         logger.info(f"Database created: {db}")

@@ -147,8 +147,7 @@ class PreparedItem:
                     'buyer_id': output['buyer_id'],
                     'sold_date': output['sold_date'],
                     'price': output['price'],
-                    'currency': output['currency'],
-                    'attr_string': attr_string
+                    'currency': output['currency']
                 }
             )
         else:
