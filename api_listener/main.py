@@ -1,34 +1,43 @@
 """Here are defined all needed functions to start the fetching proccess to the defined database"""
 import os
+import time
 import asyncio
 import nest_asyncio
 import logging
-import typing
+from typing import List, Callable
 import motor.motor_tornado
 import tornado.ioloop
 import tornado.web
 from dotenv import load_dotenv
+from pymongo import MongoClient
 from pymongo.errors import BulkWriteError, DuplicateKeyError, WriteError
 from async_api_caller import APICaller
 from data_converter import PreparedItem
 from schemas import schemas
-from helpers.add_extensions import validate_item
+from helpers.add_extensions import validate_item, upload_picture
+
+SECRETS_PATH = os.path.join(
+    os.path.dirname(
+        os.path.dirname(
+            os.path.abspath(__file__)
+        )
+    ),
+    "secrets", 
+    ".env"
+    )
+
+load_dotenv(SECRETS_PATH)
+
+LOGGING_PATH = os.getenv('PATH_TO_LOGS')
+
 logging.basicConfig(
     level=logging.INFO, 
-    filename='api_listener.log', 
+    filename=f'{LOGGING_PATH}/api_listener.log',
     format='%(asctime)s %(levelname)s:%(message)s'
     )
 
 logger = logging.getLogger(__name__)
 
-SECRETS_PATH = os.path.join(
-    os.path.dirname(
-        os.path.abspath(__file__)
-        ), 
-    "secrets", 
-    ".env"
-    )
-load_dotenv(SECRETS_PATH)
 """
 By design, asyncio does not allow its event loop to be nested and patches asyncio to allow nested use of 
 asyncio.run and loop.run_until_complete.
@@ -40,21 +49,31 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):
         db = self.settings['db']
 
-async def get_server_info() -> None:
+def get_server_info() -> None:
     """Function asserting that the database is right configurated
 
     Prints to the logs database information if the connection was successful
     """
-    conn_str = os.getenv('MONGODB_CONNECTION_STRING')
-    # set a 5-second connection timeout
-    client = motor.motor_tornado.MotorClient(conn_str, serverSelectionTimeoutMS=5000)
-    try:
-        logger.info(f"Client Server info: {await client.server_info()}")
-    except Exception:
-        logger.error("Unable to connect to the server.")
-    return client 
+    conn_str = os.getenv('MONGODB_CONNECTION_STRING_RW')
+    # define sync client, wait till it is valid, after the async process can start
+    client_sync = MongoClient(conn_str)
+    continue_trying = True
+    while continue_trying:
+        try:
+            server_info = client_sync.server_info()
+            logger.info(server_info)
+        except Exception as err:
+            logger.warning("Unable connect to the server, trying next in 5 seconds...")
+            time.sleep(5)
+            continue
+        continue_trying = False
+    else:
+        # set a 5-second connection timeout
+        client_async = motor.motor_tornado.MotorClient(conn_str, serverSelectionTimeoutMS=5000)
+        return client_async
+     
 
-async def create_collections(db: tornado.web.Application, schemas: list[dict]):
+async def create_collections(db: tornado.web.Application, schemas: List[dict]):
     """Function managing asynction collections creation in the MongoDB (applied by first setup)
 
     Args:
@@ -67,7 +86,7 @@ async def create_collections(db: tornado.web.Application, schemas: list[dict]):
     except Exception:
         logger.exception("Unable to create collections.")
 
-async def fetch_api_data(db: tornado.web.Application, do_insert: typing.Callable) -> None:
+async def fetch_api_data(db: tornado.web.Application, do_insert: Callable) -> None:
     """Function containing infinite loop, which is used for listenting to the Rarible API: https://api.rarible.org/v0.1
 
     Args:
@@ -95,7 +114,7 @@ async def fetch_api_data(db: tornado.web.Application, do_insert: typing.Callable
             else:
                 continue
 
-async def do_insert(db: tornado.web.Application, collection: str, *args: list[dict]) -> bool:
+async def do_insert(db: tornado.web.Application, collection: str, *args: List[dict]) -> bool:
     """Function managing asyncronous inserting of supplied documents into the MongoDB
 
     Args:
@@ -109,7 +128,10 @@ async def do_insert(db: tornado.web.Application, collection: str, *args: list[di
     success = False
     for arg in args:
         try:
-            await db[collection].insert_one(arg)
+            result = await db[collection].insert_one(arg)
+            if collection == "nft_item":
+                filename = await upload_picture(url = arg['url'])
+                await db[collection].update_one({'_id': result.inserted_id}, {'$set': {'filename': filename}})
             count += 1
             success = True
         except (DuplicateKeyError, BulkWriteError, WriteError):
@@ -122,7 +144,7 @@ def make_app() -> tornado.web.Application:
     """Function defining a new asyncronous tornado application"""    
     return tornado.web.Application([(r"/", MainHandler),])
 
-async def start_fetching(db: tornado.web.Application, fetch_api_data: typing.Callable, do_insert: typing.Callable, number_of_tasks: int) -> None:
+async def start_fetching(db: tornado.web.Application, fetch_api_data: Callable, do_insert: Callable, number_of_tasks: int) -> None:
     """Function creating fetch_api_data tasks, spawn maximum 10 processes in order not to overload the API with requests
 
     Args:
@@ -136,8 +158,8 @@ async def start_fetching(db: tornado.web.Application, fetch_api_data: typing.Cal
 
 if __name__ == "__main__":
     app = make_app()
-    client = tornado.ioloop.IOLoop.current().run_sync(get_server_info)
-    db = client.test_motor_database
+    client = get_server_info()
+    db = client['nft-finder']
     if str(os.getenv('FIRST_SETUP')) == 'TRUE':
         logger.info(f"Database created: {db}")
         tornado.ioloop.IOLoop.current().run_sync(lambda: create_collections(db, schemas))

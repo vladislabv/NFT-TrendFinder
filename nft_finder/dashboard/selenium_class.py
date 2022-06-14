@@ -20,7 +20,7 @@ from helpers.add_extensions import SafeList, timing, get_picture, convert_to_int
 
 logging.basicConfig(
     level=logging.INFO, 
-    filename='myapp.txt', 
+    filename='/logs/selenium.log', 
     format='%(asctime)s %(levelname)s:%(message)s'
     )
 logger = logging.getLogger(__name__)

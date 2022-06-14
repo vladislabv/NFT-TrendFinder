@@ -5,18 +5,28 @@ import pickle
 import subprocess
 import datetime
 from mongoengine import connect
-from config import MONGODB_DB, MONGODB_CONNECTION_STRING, DALLE_ENV, DALLE_FOLDER
+from dotenv import load_dotenv
+from config import MONGODB_DB, DALLE_ENV, DALLE_FOLDER
 from nft_finder import celery
-#from nft_finder import db_client as client
 from nft_finder.dashboard.prepare_data import prepare_data
 from nft_finder.dashboard.mongo_queries import AGG_PIPELINES_DICT
 from nft_finder.dashboard.models import NftItem, ItemAttribute
 from nft_finder.helpers.add_extensions import id_generator
 
+load_dotenv(
+    os.path.join(
+        os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__)
+        )),
+        "secrets",
+        ".env"
+        )
+    )
+
+MONGO_CONNECTION_STRING = os.getenv('MONGODB_CONNECTION_STRING')
 
 def mongo_connect():
-    conn_str =f"{MONGODB_CONNECTION_STRING}/{MONGODB_DB}"
-    return connect(host = conn_str)
+    return connect(host = MONGO_CONNECTION_STRING)
 
 @celery.task()
 def create_task(task_type):
@@ -26,7 +36,8 @@ def create_task(task_type):
 @celery.task(bind=True)
 def generate_picture(self, data: str):
     num_images = 1
-    shell_command = f'A: && cd {DALLE_FOLDER} && {DALLE_ENV} && python generate.py --dalle_path ./dalle.pt --text="{data.lower()}" --num_images={num_images}'
+    shell_command = f'cd {DALLE_FOLDER} && python generate.py --dalle_path ./dalle.pt --text="{data.lower()}" --num_images={num_images}'
+    # f'A: && cd {DALLE_FOLDER} && {DALLE_ENV} && python generate.py --dalle_path ./dalle.pt --text="{data.lower()}" --num_images={num_images}'
     self.update_state(
         state = 'PROGRESS',
         meta = {

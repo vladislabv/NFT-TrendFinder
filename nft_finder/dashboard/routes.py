@@ -7,7 +7,7 @@ from flask import render_template, send_from_directory, request, url_for, jsonif
 from nft_finder import db_client, cache
 from nft_finder.dashboard import dashboard_bp
 from nft_finder.tasks import get_dashboard_data, generate_picture
-from config import MEDIA_FOLDER, DALLE_FOLDER
+from config import MEDIA_FOLDER, DALLE_FOLDER, WORKDIR
 
 openings = 0
 @cache.cached(timeout=1000)
@@ -22,7 +22,7 @@ def config_dashboard():
 @dashboard_bp.route('/showpage', methods = ['GET'])
 def showpage():
 
-    list_of_files = glob.glob(os.getcwd() + '/celery_results/*.dat')
+    list_of_files = glob.glob(WORKDIR + '/celery_results/*.dat')
     latest_file = max(list_of_files, key=os.path.getctime)
 
     objects = []
@@ -55,7 +55,7 @@ def download_picture():
     gen_pictures.sort(key=os.path.getctime)
     result = gen_pictures[0]
     ext = result.split('.')[-1]
-    name = latest_folder.split('\\')[-1]
+    name = latest_folder.split(os.path.sep)[-1]
     return send_file(
         result,
         mimetype = f"image/{ext.lower()}",

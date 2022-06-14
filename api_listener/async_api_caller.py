@@ -2,6 +2,7 @@ import time
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import List, Tuple
 import requests
 from retry import retry
 from helpers.custom_exceptions import RequestFailedException
@@ -47,7 +48,7 @@ class APICaller:
                 "lastUpdatedFrom": date_unix_from
                 }
     @retry(RequestFailedException, tries = MAX_RETRIES, delay = REQUEST_TIMEOUT)
-    async def get_sell_activities(self) -> tuple[SafeList[str], str]:
+    async def get_sell_activities(self) -> Tuple[List[str], str]:
         """Function forming requests for fetching User Sell Activities on the Rarible Market Platform
         Each sell activity corresponds to a NFT Item was sold, i.e. by combination of Ids {currency:token:tokenId},
         which are needed to get wider information set about the sold NFTs.
@@ -55,7 +56,7 @@ class APICaller:
         API Docs: https://api.rarible.org/v0.1/doc#operation/getAllActivities
 
         Returns:
-            list[str]: A tuple containing list of extracted NFT identificators and the continuation string
+            List[str]: A tuple containing list of extracted NFT identificators and the continuation string
         """
         result = SafeList([])
 
@@ -67,7 +68,7 @@ class APICaller:
         }
 
         if self.start_with_item:
-            params["continuation"] = self.start_with_activity
+            params["cursor"] = self.start_with_activity
 
         response = requests.get(self.base_url + '/activities/all', params = params)
         if response.status_code == GOOD_STATUS_CODE:
@@ -79,17 +80,17 @@ class APICaller:
             else:
                 logger.exception(RequestFailedException(response))
                 
-        return result, response_json['continuation']
+        return result, response_json['cursor']
 
     @retry(RequestFailedException, tries = MAX_RETRIES, delay = REQUEST_TIMEOUT)
-    async def get_item_by_id(self, id: str) -> list[dict]:
+    async def get_item_by_id(self, id: str) -> List[dict]:
         """Function forming and sending requests to the API: https://api.rarible.org/v0.1/doc#operation/getItemById
 
         Args:
             id (str): A NFT id, composed as the combination of blockchain Ids {currency:token:tokenId}
 
         Returns:
-            list[dict]: A list containing a dictionary with corresponding NFT Information
+            List[dict]: A list containing a dictionary with corresponding NFT Information
         """
         result = SafeList([])
         response = requests.get(self.base_url + f'/items/{id}')

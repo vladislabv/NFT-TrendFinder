@@ -1,13 +1,11 @@
 # Import flask and template operators
 import os
-import sys
 import logging
 from pymongo import MongoClient
 from celery import Celery
 from flask_caching import Cache
 from flask import Flask
 from dotenv import load_dotenv
-from config import MONGODB_CONNECTION_STRING
 
 # all variables from .env will be loaded into environment
 load_dotenv(
@@ -15,13 +13,16 @@ load_dotenv(
         os.path.dirname(
             os.path.dirname(os.path.abspath(__file__)
         )),
-        "env\.env"
+        "secrets",
+        ".env"
         )
     )
 
+logging_path = os.getenv('PATH_TO_LOGS')
+
 logging.basicConfig(
     level=logging.INFO, 
-    filename='myapp.txt', 
+    filename=f'{logging_path}/nft_finder.log', 
     format='%(asctime)s %(levelname)s:%(message)s'
     )
 
@@ -54,10 +55,16 @@ app.config.update(
     CELERY_BROKER_URL=os.environ.get("CELERY_BROKER_URL"),
     CELERY_BACKEND_URL=os.environ.get("CELERY_BACKEND_URL"),
 )
-celery = make_celery(app)
-celery.control.purge()
-db_client = MongoClient(MONGODB_CONNECTION_STRING)
-cache = Cache(app)
+# make sure that celery and db are connected
+while True:
+    try:
+        celery = make_celery(app)
+        celery.control.purge()
+        db_client = MongoClient(os.getenv('MONGODB_CONNECTION_STRING'))
+        cache = Cache(app)
+        break
+    except Exception:
+        raise Exception("Could not connect to MongoDB and Celery.")
 
 import nft_finder.routes
 

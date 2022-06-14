@@ -1,8 +1,5 @@
-#from mongoengine import Document, CASCADE, ValidationError
 import mongoengine as me
 from flask_mongoengine import BaseQuerySet
-#from .selenium_class import get, get_picture
-#from app import db as me
 from PIL import UnidentifiedImageError
 
 BASE_USER_URL = 'https://rarible.com/user/'

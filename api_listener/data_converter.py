@@ -1,5 +1,6 @@
 """Defined class for converting raw API output into the feasible form, that collections accept"""
 import logging
+from typing import List, Tuple
 from datetime import datetime
 from helpers.add_extensions import SafeDict, SafeList
 
@@ -18,7 +19,7 @@ class PreparedItem:
         self.content_info = self.meta.pop('content')
         
 
-    def import_attributes(self) -> tuple[list[SafeDict], str]:
+    def import_attributes(self) -> Tuple[List[SafeDict], str]:
         """Function sorting out keys and values < 3 characters and creates non-existing fields if needed
 
         Returns:
@@ -121,7 +122,7 @@ class PreparedItem:
         return item_dict
         
 
-    def form_output(self) -> tuple[list[dict], dict]:
+    def form_output(self) -> Tuple[List[dict], dict]:
         """Function summarizes separately prepared item contents
 
         Returns:
@@ -146,8 +147,7 @@ class PreparedItem:
                     'buyer_id': output['buyer_id'],
                     'sold_date': output['sold_date'],
                     'price': output['price'],
-                    'currency': output['currency'],
-                    'attr_string': attr_string
+                    'currency': output['currency']
                 }
             )
         else:
