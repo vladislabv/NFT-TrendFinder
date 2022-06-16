@@ -10,10 +10,11 @@ __pycache__/
 # Cached files
 .pytest_cache/
 
-# Distribution / packaging
-/celery_results/
-/image_storage/images/
-/mongodb/data/
+# Distribution / packaging / temporary images
+*.dat
+*.png
+*.jpg
+/mongodb/data/db
 /rabbitmq/mnesia/
 /rabbitmq/.*cookie
 env/
