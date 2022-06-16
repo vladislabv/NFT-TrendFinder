@@ -10,16 +10,18 @@ WORKDIR /var/NFT-TrendFinder
 RUN mkdir /var/dalle
 # Clone DALLE to already created folder
 RUN git clone https://github.com/lucidrains/DALLE-pytorch.git /var/dalle/
-# Replace generate.py and place there pretrained model
+# Replace generate.py and vae.py and place there pretrained model
 RUN cp -f ./dalle_monkey_patched/generate.py /var/dalle/generate.py
+RUN cp -f ./dalle_monkey_patched/vae.py /var/dalle/dalle_pytorch/vae.py
 # Assure that we are able to create virtual environments with python.
 RUN pip install virtualenv
 # Install package working with Google Drive
 RUN pip install gdown
 # Download initial images
-RUN cd ./image_storage && gdown 1LMEtbhydAXg5CkHtgqn4tiGw8J-HVQTv && unzip nft_finder_temp_images.zip "nft_finder_temp_images/*"
+RUN mkdir /init_images
+RUN cd /init_images && gdown 1LMEtbhydAXg5CkHtgqn4tiGw8J-HVQTv && unzip nft_finder_temp_images.zip "nft_finder_temp_images/*"
 # Clean up
-RUN rm ./image_storage/nft_finder_temp_images.zip
+RUN rm /init_images/nft_finder_temp_images.zip
 # Download pretrained model
 RUN wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=12xOf3Ve7Kzv0Ab8taahCrKEUmBw-qr_j' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=12xOf3Ve7Kzv0Ab8taahCrKEUmBw-qr_j" -O /var/dalle/dalle.pt && rm -rf /tmp/cookies.txt
 # Set the virtual environment for flask application
@@ -35,6 +37,8 @@ ENV FLASK_ENV=development
 # Install Python dependencies.
 # ENV PATH="/var/NFT-TrendFinder/env/bin:$PATH"
 RUN pip install -r requirements.txt && pip install -e .
+# Run initial image generating
+# RUN cd /var/dalle && python generate.py --taming --num_images 1 --text "just test string for generating" --dalle_path ./dalle.pt
 # Create an unprivileged user for running our Python code.
 RUN adduser --disabled-password --gecos 'appRunner' nft_finder
 # Start flask server when container is up

@@ -9,7 +9,7 @@ services:
 
 
   rabbit:
-    image: rabbitmq:3-management
+    image: rabbitmq:3.10.5-management
     hostname: rabbit
     container_name: rabbit
     environment:
@@ -77,7 +77,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./logs:/var/NFT-TrendFinder/logs
-      - ./temp_images:/var/NFT-TrendFinder/temp_images
+      - ./image_storage:/var/NFT-TrendFinder/image_storage
       - ./api_listener:/NFT-TrendFinder/api_listener
       - ./config.py:/var/NFT-TrendFinder/config.py
     depends_on:
@@ -90,6 +90,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
     container_name: app
     restart: unless-stopped
     volumes:

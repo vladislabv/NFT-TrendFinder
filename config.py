@@ -5,6 +5,7 @@ DEBUG = True
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 WORKDIR = os.path.join(os.path.sep, "var", "NFT-TrendFinder")
 MEDIA_FOLDER = os.path.join(WORKDIR, "image_storage", "images")
+MEDIA_FOLDER_INIT = os.path.join(os.path.sep, "init_images", "nft_finder_temp_images", "images")
 TXT_MEDIA_FOLDER = os.path.join(WORKDIR, "image_storage")
 # DALLE paths
 DALLE_FOLDER = os.path.join(os.path.sep, 'var', 'dalle')

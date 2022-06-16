@@ -3,11 +3,11 @@ import time
 import json
 import glob
 import pickle
-from flask import render_template, send_from_directory, request, url_for, jsonify, redirect, flash, send_file
-from nft_finder import db_client, cache
+from flask import render_template, send_from_directory, request, url_for, jsonify, redirect, send_file
+from nft_finder import cache
 from nft_finder.dashboard import dashboard_bp
 from nft_finder.tasks import get_dashboard_data, generate_picture
-from config import MEDIA_FOLDER, DALLE_FOLDER, WORKDIR
+from config import MEDIA_FOLDER, DALLE_FOLDER, WORKDIR, MEDIA_FOLDER_INIT
 
 openings = 0
 @cache.cached(timeout=1000)
@@ -44,7 +44,10 @@ def showpage():
 
 @dashboard_bp.route('/uploads/<path:filename>')
 def download_file(filename):
-    return send_from_directory(MEDIA_FOLDER, filename, as_attachment=True, cache_timeout = 0)
+    try:
+        return send_from_directory(MEDIA_FOLDER_INIT, filename, as_attachment=True, cache_timeout = 0)
+    except Exception:
+        return send_from_directory(MEDIA_FOLDER, filename, as_attachment=True, cache_timeout = 0)
 
 @dashboard_bp.route('/download')
 def download_picture():

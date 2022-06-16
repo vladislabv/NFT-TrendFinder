@@ -12,6 +12,7 @@ __pycache__/
 
 # Distribution / packaging
 /celery_results/
+/image_storage/images/
 /mongodb/data/
 /rabbitmq/mnesia/
 /rabbitmq/.*cookie
