@@ -7,7 +7,7 @@ import functools
 from io import BytesIO
 from contextlib import contextmanager
 import asyncio
-import requests
+import aiohttp
 import aiofiles as aiof
 from PIL import Image
 from svglib.svglib import svg2rlg
@@ -36,59 +36,62 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
 async def upload_picture(url: str) -> str:
     filename = os.path.join(os.getenv('MEDIA_FOLDER'), "image_")
     #filename_desc = os.path.join(TXT_MEDIA_FOLDER, "image_")
-    if len(url):
-        if url.endswith('.mp3') or url.endswith('.mp4') or url.endswith('.gif'):
-            extension = None
-        elif url.endswith('.svg'):
-            extension = None
-        elif url.endswith('.jpg'):
-            extension = 'jpg'
-        elif url.endswith('.png'):
-            extension = 'png'
-        else:
-            extension = None
-        
-        if extension is not None and extension != 'svg':
-            try:
-                response = await requests.get(url).content
-                img = Image.open(BytesIO(response))
-            except Exception as err:
-                logger.error(err)
+    async with aiohttp.ClientSession() as session:
+        if len(url):
+            if url.endswith('.mp3') or url.endswith('.mp4') or url.endswith('.gif'):
+                extension = None
+            elif url.endswith('.svg'):
+                extension = None
+            elif url.endswith('.jpg'):
+                extension = 'jpg'
+            elif url.endswith('.png'):
+                extension = 'png'
+            else:
+                extension = 'png'
+            
+            if extension is not None and extension != 'svg':
+                async with session.get(url) as response:
+                    try: 
+                        img = Image.open(BytesIO(await response.read()))
+                    except Exception as err:
+                        logger.error(err)
+                        return None
+                img_id = id_generator()
+                filename += img_id + '.' + extension
+                #filename_desc += img_id + '.' + 'txt'
+                if img.mode in ("RGBA", "P"): 
+                    try:
+                        img = img.convert("RGB")
+                    except OSError as err:
+                        logger.error(err)
+                        return None
+                img.save(filename)
+                #async with aiof.open(filename_desc, 'wb+', encoding='cp1252') as file:
+                    #file.write(description)
+            elif extension == 'svg':
+                async with session.get(url) as response:
+                    try:
+                        result = await response.read()
+                    except Exception as err:
+                        logger.error(err)
+                        return None
+                img_id = id_generator()
+                filename += img_id + '.' + extension
+                #filename_desc += img_id + '.' + 'txt'
+                async with aiof.open(filename, 'wb+', encoding='utf-8') as img:
+                    img.write(result)
+                #async with aiof.open(filename_desc, 'wb+', encoding='cp1252') as file:
+                    #file.write(description)
+                drawing = svg2rlg(filename)
+                filename_converted += img_id + '.png'
+                os.remove(filename)
+                filename = filename_converted
+                renderPM.drawToFile(drawing, filename_converted, fmt = 'PNG')
+            else:
+                img = None
                 return None
-            img_id = id_generator()
-            filename += img_id + '.' + extension
-            filename_desc += img_id + '.' + 'txt'
-            if img.mode in ("RGBA", "P"): 
-                try:
-                    img = img.convert("RGB")
-                except OSError as err:
-                    logger.error(err)
-                    return None
-            img.save(filename)
-            #async with aiof.open(filename_desc, 'wb+', encoding='cp1252') as file:
-                #file.write(description)
-        elif extension == 'svg':
-            try:
-                response = await requests.get(url, allow_redirects=True).content
-            except Exception as err:
-                logger.error(err)
-                return None
-            img_id = id_generator()
-            filename += img_id + '.' + extension
-            filename_desc += img_id + '.' + 'txt'
-            async with aiof.open(filename, 'wb+', encoding='utf-8') as img:
-                img.write(response)
-            #async with aiof.open(filename_desc, 'wb+', encoding='cp1252') as file:
-                #file.write(description)
-            drawing = svg2rlg(filename)
-            filename_converted += img_id + '.png'
-            os.remove(filename)
-            filename = filename_converted
-            renderPM.drawToFile(drawing, filename_converted, fmt = 'PNG')
         else:
-            img = None
-    else:
-        return None
+            return None
     return filename
 
 
